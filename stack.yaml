@@ -4,6 +4,16 @@ resolver: lts-23.21
 packages:
 - '.'
 
+extra-include-dirs:
+- /usr/local/include
+
+extra-lib-dirs:
+- /usr/local/lib
+
+flags:
+  hevm:
+    static-secp256k1: false
+
 extra-deps:
 - git: https://github.com/ethereum/hevm.git
   commit: d282dff6e0d9ea9f7cf02e17e8ac0b268ef634da

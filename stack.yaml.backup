@@ -1,0 +1,93 @@
+resolver: lts-21.25
+# matching https://github.com/NixOS/nixpkgs/blob/322d8a3c6940039f7cff179a8b09c5d7ca06359d/pkgs/development/haskell-modules/configuration-hackage2nix/stackage.yaml#L1
+
+packages:
+- '.'
+
+extra-deps:
+- git: https://github.com/ethereum/hevm.git
+  commit: d282dff6e0d9ea9f7cf02e17e8ac0b268ef634da
+- smt2-parser-0.1.0.1@sha256:1e1a4565915ed851c13d1e6b8bb5185cf5d454da3b43170825d53e221f753d77,1421
+- spawn-0.3@sha256:b91e01d8f2b076841410ae284b32046f91471943dc799c1af77d666c72101f02,1162
+- spool-0.1@sha256:77780cbfc2c0be23ff2ea9e474062f3df97fcd9db946ee0b3508280a923b83e2,1461
+- strip-ansi-escape-0.1.0.0@sha256:08f2ed93b16086a837ec46eab7ce8d27cf39d47783caaeb818878ea33c2ff75f,1628
+- vty-windows-0.2.0.3@sha256:0c010b1086a725046a8bb08bb1e6bfdfdb3cfe1c72d6fa77c37306ef9ec774d8,2844
+- aeson-optics-1.2.1@sha256:f0dc0ffba23baed6ee93e3ca91e1630c4da38eee46c56c28f3b264f376c361c0,1551
+- base16-1.0@sha256:96864b42797a1856a561fb8faff611ea3d8fc69abdc6fc503c6b7d57a1928399,2649
+- cryptonite-0.30@sha256:12c85dea7be63e5ad90bcb487eb3846bf3c413347f94336fa1dede7b28f9936a,18301
+- extra-1.8@sha256:57d9200fbea2e88e05e0be35925511764827b1c86d3214106b0b610f331fc40c,2725
+- memory-0.18.0@sha256:9f4de967352f80b6f174c9a166f315393dde80b77d7b67e41268ae7dec0319f9,4581
+- optics-core-0.4.1.1@sha256:4639668eff2aaace77d4b80d2a039cee1bd3627528b1cb9f044dea0f087433cb,5626
+- optics-extra-0.4.2.1@sha256:4d2750a267441534ff427777ccfbad551468b531056ec4ee9a5835cc33725b65,4042
+- optics-th-0.4.1@sha256:24f400d83a02e3320cc0e2b17c68f5c14fdf15fb4089b71369a93c5399bc266d,3261
+- optparse-applicative-0.19.0.0@sha256:0b47b3ff7eb4a855b5f7d401690365fc62a32057374927ce0d478b620996222d,5813
+- unliftio-core-0.2.1.0@sha256:f6a2736f858b5390d9384dca43d3ea4d96e9ca17217791791ca4951ba6e8072a,996
+- vty-crossplatform-0.4.0.0@sha256:50593f91ad16777d921138475a8d2784d538fd206addd30664c620278d6c8544,3172
+- vty-unix-0.2.0.0@sha256:2af3d0bdae3c4b7b7e567ee374efe32c7439fabdf9096465ce011a6c6736e9ae,2932
+- witch-1.2.4.0@sha256:a0ffa04ec665c5488f2876fe6c67e1bd9e9ea21c9db0b2fa1ecb78153ee4227d,1873
+# Core GHC packages that need to be added explicitly
+- text-1.2.5.0
+- binary-0.8.9.3
+- directory-1.3.9.0
+- process-1.6.26.1
+- unix-2.8.7.0
+- parsec-3.1.18.0
+- Cabal-3.6.3.0
+- containers-0.6.8
+- exceptions-0.10.10
+- filepath-1.4.301.0
+- template-haskell-2.19.0.0
+# Additional missing dependencies
+- data-array-byte-0.1.0.1
+- character-ps-0.1
+- generically-0.1.1
+- integer-conversion-0.1.1
+- text-iso8601-0.1.1
+- time-compat-1.9.8
+- vector-0.13.2.0
+- OneTuple-0.4.2
+- primitive-0.9.1.0
+- file-io-0.1.5
+# Use compatible bytestring version
+- bytestring-0.11.5.4
+# Additional recommended packages
+- aeson-2.1.2.1@sha256:aaa8be7ead024f05e9d5b290eb7ee5750deec1137b8f08f7ef039b8cb9036351,6355
+allow-newer: true
+allow-newer-deps:
+  - hevm
+  - aeson
+  - optics
+  - witch
+  - base16
+  - bytestring
+  - primitive
+  - OneTuple
+  - time-compat
+  - vector
+  - Cabal
+  - bifunctors
+  - directory
+  - free
+  - haskell-src-meta
+  - invariant
+  - lens
+  - megaparsec
+  - microlens-th
+  - optparse-generic
+  - process
+  - scientific
+  - tagged
+  - text-short
+  - th-abstraction
+  - th-compat
+  - th-expand-syns
+  - th-lift
+  - th-orphans
+  - unix
+  - unordered-containers
+  - uuid-types
+  - http-conduit
+  - vty-crossplatform
+  - brick
+  - vty-unix
+  - vty
