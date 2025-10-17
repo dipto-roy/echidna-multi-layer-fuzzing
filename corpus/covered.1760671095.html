@@ -1,0 +1,32 @@
+<style> code { white-space: pre-wrap; display: block; background-color: #eee; }.executed { background-color: #afa; }.reverted { background-color: #ffa; }.unexecuted { background-color: #faa; }.neutral { background-color: #eee; }</style><b>/home/dip-roy/echidna_dev/echidna_1/echidna/contact/bonding-curve.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>pragma solidity ^0.8.20;</span>
+  3 |     | <span class='neutral'></span>
+  4 | *r  | <span class='executed'>contract BondingCurveAMM {</span>
+  5 | *   | <span class='executed'>    uint256 public reserveETH;</span>
+  6 | *   | <span class='executed'>    uint256 public reserveTOKEN;</span>
+  7 | *   | <span class='executed'>    uint256 public constant K = 1e18;</span>
+  8 |     | <span class='neutral'></span>
+  9 | *   | <span class='executed'>    function addLiquidity() external payable {</span>
+ 10 | *   | <span class='executed'>        reserveETH += msg.value;</span>
+ 11 | *   | <span class='executed'>        reserveTOKEN += msg.value; // 1:1 dummy rule</span>
+ 12 |     | <span class='neutral'>    }</span>
+ 13 |     | <span class='neutral'></span>
+ 14 | *   | <span class='executed'>    function swapETHForTOKEN() external payable {</span>
+ 15 |     | <span class='neutral'>        // simplistic x+y curve; not realistic, but tests arithmetic</span>
+ 16 | *   | <span class='executed'>        reserveETH += msg.value;</span>
+ 17 | *   | <span class='executed'>        uint out = msg.value; </span>
+ 18 | *r  | <span class='executed'>        require(reserveTOKEN &gt;= out, &quot;liquidity&quot;);</span>
+ 19 | *   | <span class='executed'>        reserveTOKEN -= out;</span>
+ 20 |     | <span class='neutral'>    }</span>
+ 21 |     | <span class='neutral'></span>
+ 22 |     | <span class='unexecuted'>    function echidna_reserves_non_negative() external view returns (bool) {</span>
+ 23 |     | <span class='unexecuted'>        return reserveETH &gt;= 0 &amp;&amp; reserveTOKEN &gt;= 0;</span>
+ 24 |     | <span class='neutral'>    }</span>
+ 25 |     | <span class='neutral'>}</span>
+ 26 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
