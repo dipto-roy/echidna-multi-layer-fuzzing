@@ -1,0 +1,14 @@
+testMode: "property"
+testLimit: 5000
+seqLen: 100
+format: "text"
+coverage: true
+corpusDir: "corpus"
+
+# Multi-Layer Fuzzing (basic) - matching actual contract functions
+preDilutionFunctions:
+  - "increment"
+  - "decrement"
+  - "reset"
+  - "dangerousFunction"
+preDilutionWeight: 0.35

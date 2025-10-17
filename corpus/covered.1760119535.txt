@@ -1,0 +1,17 @@
+/home/dip-roy/echidna_dev/echidna_1/echidna/contact/intgeroverflow.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | pragma solidity ^0.8.20;
+  3 |     | 
+  4 | *r  | contract IntegerOverflowGuard {
+  5 | *   |     uint256 public x;
+  6 |     | 
+  7 | *   |     function add(uint256 y) external {
+  8 | *   |         x += y; // 0.8+ has built-in checks
+  9 |     |     }
+ 10 |     | 
+ 11 |     |     function echidna_x_never_wraps() external view returns (bool) {
+ 12 |     |         return x >= 0;
+ 13 |     |     }
+ 14 |     | }
+ 15 |     | 
+

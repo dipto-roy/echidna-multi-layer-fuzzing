@@ -10,7 +10,7 @@ import GHC.Conc (numCapabilities)
 
 import Echidna.ABI (GenDict, emptyDict, encodeSig)
 import Echidna.Types
-import Echidna.Types.Coverage (CoverageFileType, CoverageMap)
+import Echidna.Types.Coverage (CoverageFileType(..), CoverageMap)
 import Echidna.Types.Test (TestType (..), EchidnaTest(..))
 import Echidna.Types.Tx (Tx)
 
@@ -21,7 +21,8 @@ data CampaignConf = CampaignConf
   , stopOnFail         :: Bool
     -- ^ Whether to stop the campaign immediately if any property fails
   , estimateGas        :: Bool
-    -- ^ Whether to collect gas usage statistics
+    -- ^ Whether to collect gas usage statistics, preDilutionFunctions :: [Text]
+    -- ^ list of names of functions to pre-dilute
   , seqLen             :: Int
     -- ^ Number of calls between state resets (e.g. \"every 10 calls,
     -- reset the state to avoid unrecoverable states/save memory\"
@@ -63,6 +64,44 @@ data CampaignConf = CampaignConf
     -- ^ Number of times we may revisit a particular branching point
     -- before we consult the SMT solver to check reachability.
     -- Only relevant if symExec is True and symExecConcolic is False
+  , preDilutionFunctions :: [String]
+    -- ^ list of names of functions to pre-dilute
+  , preDilutionWeight    :: Double
+    -- ^ pre-dilution weight (0.0–1.0)
+    
+  -- Multi-Layer Fuzzing Optimization Framework
+  , smartMutation        :: Bool
+    -- ^ Enable enhanced mutation strategies
+  , mutationDepth        :: Int
+    -- ^ Layers of mutation (1-5)
+  , priorityMutationRate :: Double
+    -- ^ Higher mutation rate for priority functions
+  , normalMutationRate   :: Double
+    -- ^ Lower rate for normal functions
+  , differentialTreatment :: Bool
+    -- ^ Enable different strategies per function type
+  , prioritySequenceLength :: Int
+    -- ^ Longer sequences for priority functions
+  , normalSequenceLength   :: Int
+    -- ^ Shorter sequences for normal functions
+  , priorityGasLimit     :: Integer
+    -- ^ Higher gas limit for priority functions
+  , normalGasLimit       :: Integer
+    -- ^ Standard gas limit for normal functions
+  , adaptiveFuzzing      :: Bool
+    -- ^ Enable adaptive strategy selection
+  , crossoverRate        :: Double
+    -- ^ Genetic algorithm crossover rate
+  , elitismRate          :: Double
+    -- ^ Keep best percentage of test cases
+  , diversityThreshold   :: Double
+    -- ^ Maintain test case diversity
+  , optimizationTargets  :: [String]
+    -- ^ List of optimization objectives
+  , strategyLayers       :: [(String, String)]
+    -- ^ Layered strategy configuration
+  , maxArraySize         :: Int
+    -- ^ Maximum array size for complex testing
   }
 
 data WorkerType = FuzzWorker | SymbolicWorker deriving (Eq)
@@ -210,6 +249,49 @@ defaultSymExecMaxIters = 10
 defaultSymExecAskSMTIters :: Integer
 defaultSymExecAskSMTIters = 1
 
+defaultCampaignConf :: CampaignConf
+defaultCampaignConf = CampaignConf
+  { testLimit = defaultTestLimit
+  , stopOnFail = False
+  , estimateGas = False
+  , seqLen = defaultSequenceLength
+  , shrinkLimit = defaultShrinkLimit
+  , knownCoverage = Just mempty
+  , seed = Nothing
+  , dictFreq = 0.40
+  , corpusDir = Nothing
+  , mutConsts = (1, 1, 1, 1)
+  , coverageFormats = [Txt,Html,Lcov]
+  , workers = Nothing
+  , serverPort = Nothing
+  , symExec = False
+  , symExecConcolic = True
+  , symExecTargets = Nothing
+  , symExecTimeout = defaultSymExecTimeout
+  , symExecNSolvers = defaultSymExecNWorkers
+  , symExecMaxIters = defaultSymExecMaxIters
+  , symExecAskSMTIters = defaultSymExecAskSMTIters
+  , preDilutionFunctions = []
+  , preDilutionWeight = 0.5
+  
+  -- Multi-Layer Fuzzing Optimization Framework defaults
+  , smartMutation = True
+  , mutationDepth = 3
+  , priorityMutationRate = 0.8
+  , normalMutationRate = 0.3
+  , differentialTreatment = True
+  , prioritySequenceLength = 150
+  , normalSequenceLength = 50
+  , priorityGasLimit = 8000000
+  , normalGasLimit = 3000000
+  , adaptiveFuzzing = True
+  , crossoverRate = 0.6
+  , elitismRate = 0.1
+  , diversityThreshold = 0.7
+  , optimizationTargets = ["coverage", "bug_detection"]
+  , strategyLayers = []
+  , maxArraySize = 1000
+  }
 -- | Get number of fuzzing workers (doesn't include sym exec worker)
 -- Defaults to `N` if set to Nothing, where `N` is Haskell's -N value,
 -- usually the number of cores, clamped between 1 and 4.

@@ -1,0 +1,26 @@
+/home/dip-roy/echidna_dev/echidna_1/echidna/contact/accesscontrolrole.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | pragma solidity ^0.8.20;
+  3 |     | 
+  4 | *r  | contract AccessControlRoles {
+  5 | *   |     address public owner;
+  6 |     |     mapping(address => bool) public minter;
+  7 |     | 
+  8 | *   |     constructor() { owner = msg.sender; }
+  9 |     | 
+ 10 | *r  |     modifier onlyOwner() { require(msg.sender == owner, "not owner"); _; }
+ 11 |     | 
+ 12 | *   |     function setMinter(address a, bool v) external onlyOwner {
+ 13 |     |         minter[a] = v;
+ 14 |     |     }
+ 15 |     | 
+ 16 | *   |     function renounceOwnership() external onlyOwner {
+ 17 |     |         owner = address(0);
+ 18 |     |     }
+ 19 |     | 
+ 20 |     |     function echidna_owner_not_zero() external view returns (bool) {
+ 21 |     |         // Test whether renouncing breaks privileged actions assumptions
+ 22 |     |         return owner != address(0) || true; // allow renounce, property trivially true (example)
+ 23 |     |     }
+ 24 |     | }
+

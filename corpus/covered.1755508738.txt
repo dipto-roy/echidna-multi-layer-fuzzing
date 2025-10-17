@@ -1,0 +1,57 @@
+/home/dip-roy/echidna_dev/echidna_1/echidna/buggy_contract.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | pragma solidity ^0.8.0;
+  3 |     | 
+  4 | *r  | contract BuggyContract {
+  5 | *   |     uint256 public counter;
+  6 | *   |     mapping(address => uint256) public userCounts;
+  7 | *   |     address public owner;
+  8 |     |     
+  9 | *   |     constructor() {
+ 10 | *   |         owner = msg.sender;
+ 11 | *   |         counter = 0;
+ 12 |     |     }
+ 13 |     |     
+ 14 | *   |     function increment() public {
+ 15 | *   |         counter++;
+ 16 | *   |         userCounts[msg.sender]++;
+ 17 |     |     }
+ 18 |     |     
+ 19 | *   |     function decrement() public {
+ 20 | *r  |         require(counter > 0, "Counter cannot be negative");
+ 21 | *   |         counter--;
+ 22 | *   |         userCounts[msg.sender]--;
+ 23 |     |     }
+ 24 |     |     
+ 25 | *   |     function reset() public {
+ 26 | *r  |         require(msg.sender == owner, "Only owner can reset");
+ 27 |     |         counter = 0;
+ 28 |     |         // Bug: We don't reset user counts!
+ 29 |     |     }
+ 30 |     |     
+ 31 | *   |     function dangerousFunction(uint256 value) public {
+ 32 |     |         // Bug: This can cause integer overflow in older Solidity versions
+ 33 | *   |         counter += value;
+ 34 |     |     }
+ 35 |     |     
+ 36 |     |     // Echidna properties - these should always return true
+ 37 |     |     function echidna_counter_never_negative() public view returns (bool) {
+ 38 |     |         return counter >= 0;
+ 39 |     |     }
+ 40 |     |     
+ 41 |     |     function echidna_user_count_never_negative() public view returns (bool) {
+ 42 |     |         return userCounts[msg.sender] >= 0;
+ 43 |     |     }
+ 44 |     |     
+ 45 |     |     function echidna_counter_reasonable() public view returns (bool) {
+ 46 |     |         // This might fail due to the dangerous function
+ 47 |     |         return counter < 1000000;
+ 48 |     |     }
+ 49 |     |     
+ 50 |     |     function echidna_user_count_matches_increments() public view returns (bool) {
+ 51 |     |         // This is a simplified check - in practice you'd track this more carefully
+ 52 |     |         return userCounts[msg.sender] <= counter;
+ 53 |     |     }
+ 54 |     | }
+ 55 |     | 
+

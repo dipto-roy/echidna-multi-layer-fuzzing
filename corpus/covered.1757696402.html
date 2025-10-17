@@ -1,0 +1,30 @@
+<style> code { white-space: pre-wrap; display: block; background-color: #eee; }.executed { background-color: #afa; }.reverted { background-color: #ffa; }.unexecuted { background-color: #faa; }.neutral { background-color: #eee; }</style><b>/home/dip-roy/echidna_dev/echidna_1/echidna/contact/accesscontrolrole.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>pragma solidity ^0.8.20;</span>
+  3 |     | <span class='neutral'></span>
+  4 | *r  | <span class='executed'>contract AccessControlRoles {</span>
+  5 | *   | <span class='executed'>    address public owner;</span>
+  6 | *   | <span class='executed'>    mapping(address =&gt; bool) public minter;</span>
+  7 |     | <span class='neutral'></span>
+  8 | *   | <span class='executed'>    constructor() { owner = msg.sender; }</span>
+  9 |     | <span class='neutral'></span>
+ 10 | *r  | <span class='executed'>    modifier onlyOwner() { require(msg.sender == owner, &quot;not owner&quot;); _; }</span>
+ 11 |     | <span class='neutral'></span>
+ 12 | *   | <span class='executed'>    function setMinter(address a, bool v) external onlyOwner {</span>
+ 13 |     | <span class='unexecuted'>        minter[a] = v;</span>
+ 14 |     | <span class='neutral'>    }</span>
+ 15 |     | <span class='neutral'></span>
+ 16 | *   | <span class='executed'>    function renounceOwnership() external onlyOwner {</span>
+ 17 |     | <span class='unexecuted'>        owner = address(0);</span>
+ 18 |     | <span class='neutral'>    }</span>
+ 19 |     | <span class='neutral'></span>
+ 20 |     | <span class='unexecuted'>    function echidna_owner_not_zero() external view returns (bool) {</span>
+ 21 |     | <span class='neutral'>        // Test whether renouncing breaks privileged actions assumptions</span>
+ 22 |     | <span class='unexecuted'>        return owner != address(0) || true; // allow renounce, property trivially true (example)</span>
+ 23 |     | <span class='neutral'>    }</span>
+ 24 |     | <span class='neutral'>}</span>
+
+</code>
+<br />
+

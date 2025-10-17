@@ -1,0 +1,23 @@
+<style> code { white-space: pre-wrap; display: block; background-color: #eee; }.executed { background-color: #afa; }.reverted { background-color: #ffa; }.unexecuted { background-color: #faa; }.neutral { background-color: #eee; }</style><b>/home/dip-roy/echidna_dev/echidna_1/echidna/contact/v1-v2.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>pragma solidity ^0.8.20;</span>
+  3 |     | <span class='neutral'></span>
+  4 |     | <span class='unexecuted'>contract V1 {</span>
+  5 | *   | <span class='executed'>    uint256 public a;</span>
+  6 | *   | <span class='executed'>    uint256 public b;</span>
+  7 |     | <span class='neutral'>}</span>
+  8 |     | <span class='neutral'></span>
+  9 | *r  | <span class='executed'>contract V2 is V1 {</span>
+ 10 | *   | <span class='executed'>    uint256 public c;</span>
+ 11 | *   | <span class='executed'>    function set(uint256 _a, uint256 _b, uint256 _c) external {</span>
+ 12 | *   | <span class='executed'>        a=_a;b=_b;c=_c;</span>
+ 13 |     | <span class='neutral'>    }</span>
+ 14 |     | <span class='unexecuted'>    function echidna_storage_order() external view returns (bool) {</span>
+ 15 |     | <span class='unexecuted'>        return a &gt;= 0 &amp;&amp; b &gt;= 0 &amp;&amp; c &gt;= 0;</span>
+ 16 |     | <span class='neutral'>    }</span>
+ 17 |     | <span class='neutral'>}</span>
+
+</code>
+<br />
+

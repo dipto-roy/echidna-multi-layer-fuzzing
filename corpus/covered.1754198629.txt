@@ -1,0 +1,184 @@
+/home/dip-roy/echidna_dev/echidna_1/echidna/multilayer_test_contract.sol
+   1 |     | // SPDX-License-Identifier: MIT
+   2 |     | pragma solidity ^0.8.0;
+   3 |     | 
+   4 | *r  | contract MultiLayerTestContract {
+   5 |     |     uint256 public balance;
+   6 | *   |     mapping(address => uint256) public userBalances;
+   7 |     |     mapping(address => mapping(address => uint256)) public allowances;
+   8 | *   |     address public owner;
+   9 |     |     uint256 public totalSupply;
+  10 | *   |     bool public paused;
+  11 |     |     
+  12 | *   |     constructor() {
+  13 | *   |         owner = msg.sender;
+  14 | *   |         totalSupply = 1000000 * 10**18;
+  15 | *   |         balance = totalSupply;
+  16 |     |     }
+  17 |     |     
+  18 |     |     modifier onlyOwner() {
+  19 | *r  |         require(msg.sender == owner, "Not owner");
+  20 |     |         _;
+  21 |     |     }
+  22 |     |     
+  23 |     |     modifier notPaused() {
+  24 | *   |         require(!paused, "Contract paused");
+  25 |     |         _;
+  26 |     |     }
+  27 |     |     
+  28 |     |     // Priority functions for pre-dilution testing
+  29 | *r  |     function transfer(address to, uint256 amount) public notPaused returns (bool) {
+  30 | *r  |         require(userBalances[msg.sender] >= amount, "Insufficient balance");
+  31 | *r  |         require(to != address(0), "Invalid recipient");
+  32 |     |         
+  33 | *   |         userBalances[msg.sender] -= amount;
+  34 | *   |         userBalances[to] += amount;
+  35 | *   |         return true;
+  36 |     |     }
+  37 |     |     
+  38 | *   |     function approve(address spender, uint256 amount) public notPaused returns (bool) {
+  39 | *   |         allowances[msg.sender][spender] = amount;
+  40 | *   |         return true;
+  41 |     |     }
+  42 |     |     
+  43 | *   |     function withdraw(uint256 amount) public notPaused {
+  44 | *r  |         require(userBalances[msg.sender] >= amount, "Insufficient balance");
+  45 | *   |         require(balance >= amount, "Contract insufficient balance");
+  46 |     |         
+  47 | *   |         userBalances[msg.sender] -= amount;
+  48 | *   |         balance -= amount;
+  49 |     |         // Potential reentrancy vulnerability for testing
+  50 | *   |         payable(msg.sender).transfer(amount);
+  51 |     |     }
+  52 |     |     
+  53 | *   |     function deposit() public payable notPaused {
+  54 | *r  |         require(msg.value > 0, "Must deposit something");
+  55 | *   |         balance += msg.value;
+  56 | *   |         userBalances[msg.sender] += msg.value;
+  57 |     |     }
+  58 |     |     
+  59 | *   |     function mint(address to, uint256 amount) public onlyOwner notPaused {
+  60 |     |         require(to != address(0), "Invalid recipient");
+  61 |     |         require(amount > 0, "Must mint positive amount");
+  62 |     |         
+  63 |     |         totalSupply += amount;
+  64 |     |         userBalances[to] += amount;
+  65 |     |         // Bug: No check for overflow in totalSupply
+  66 |     |     }
+  67 |     |     
+  68 | *   |     function burn(uint256 amount) public notPaused {
+  69 | *r  |         require(userBalances[msg.sender] >= amount, "Insufficient balance");
+  70 |     |         
+  71 | *   |         userBalances[msg.sender] -= amount;
+  72 | *   |         totalSupply -= amount;
+  73 |     |         // Bug: No check for underflow in totalSupply
+  74 |     |     }
+  75 |     |     
+  76 | *   |     function swap(uint256 amountIn, uint256 minAmountOut) public notPaused returns (uint256) {
+  77 | *r  |         require(amountIn > 0, "Invalid input amount");
+  78 | *r  |         require(userBalances[msg.sender] >= amountIn, "Insufficient balance");
+  79 |     |         
+  80 |     |         // Simplified swap calculation with potential manipulation
+  81 | *   |         uint256 amountOut = (amountIn * 95) / 100; // 5% fee
+  82 | *r  |         require(amountOut >= minAmountOut, "Slippage too high");
+  83 |     |         
+  84 | *   |         userBalances[msg.sender] -= amountIn;
+  85 | *   |         userBalances[msg.sender] += amountOut;
+  86 |     |         
+  87 | *   |         return amountOut;
+  88 |     |     }
+  89 |     |     
+  90 |     |     // Normal functions for differential treatment testing
+  91 | *   |     function getBalance(address user) public view returns (uint256) {
+  92 | *   |         return userBalances[user];
+  93 |     |     }
+  94 |     |     
+  95 |     |     function getAllowance(address user, address spender) public view returns (uint256) {
+  96 |     |         return allowances[user][spender];
+  97 |     |     }
+  98 |     |     
+  99 | *   |     function pause() public onlyOwner {
+ 100 |     |         paused = true;
+ 101 |     |     }
+ 102 |     |     
+ 103 | *   |     function unpause() public onlyOwner {
+ 104 |     |         paused = false;
+ 105 |     |     }
+ 106 |     |     
+ 107 | *   |     function transferOwnership(address newOwner) public onlyOwner {
+ 108 |     |         require(newOwner != address(0), "Invalid new owner");
+ 109 |     |         owner = newOwner;
+ 110 |     |     }
+ 111 |     |     
+ 112 |     |     // Complex function for smart mutation testing
+ 113 | *   |     function complexOperation(
+ 114 |     |         uint256[] memory amounts,
+ 115 |     |         address[] memory recipients,
+ 116 |     |         bool[] memory flags
+ 117 |     |     ) public notPaused {
+ 118 | *r  |         require(amounts.length == recipients.length, "Array length mismatch");
+ 119 | *r  |         require(amounts.length == flags.length, "Array length mismatch");
+ 120 | *r  |         require(amounts.length <= 10, "Too many operations");
+ 121 |     |         
+ 122 |     |         for (uint256 i = 0; i < amounts.length; i++) {
+ 123 |     |             if (flags[i]) {
+ 124 |     |                 require(userBalances[msg.sender] >= amounts[i], "Insufficient balance");
+ 125 |     |                 userBalances[msg.sender] -= amounts[i];
+ 126 |     |                 userBalances[recipients[i]] += amounts[i];
+ 127 |     |             }
+ 128 |     |         }
+ 129 |     |     }
+ 130 |     |     
+ 131 |     |     // Echidna properties for multi-layer testing
+ 132 |     |     function echidna_balance_never_negative() public view returns (bool) {
+ 133 |     |         return balance >= 0;
+ 134 |     |     }
+ 135 |     |     
+ 136 |     |     function echidna_total_supply_consistency() public view returns (bool) {
+ 137 |     |         return totalSupply >= 0;
+ 138 |     |     }
+ 139 |     |     
+ 140 |     |     function echidna_user_balance_never_negative() public view returns (bool) {
+ 141 |     |         return userBalances[msg.sender] >= 0;
+ 142 |     |     }
+ 143 |     |     
+ 144 |     |     function echidna_total_supply_reasonable() public view returns (bool) {
+ 145 |     |         return totalSupply <= 10**30; // Reasonable upper bound
+ 146 |     |     }
+ 147 |     |     
+ 148 |     |     function echidna_contract_balance_consistency() public view returns (bool) {
+ 149 |     |         // Contract balance should not exceed total supply
+ 150 |     |         return balance <= totalSupply;
+ 151 |     |     }
+ 152 |     |     
+ 153 |     |     function echidna_allowance_reasonable() public view returns (bool) {
+ 154 |     |         return allowances[msg.sender][address(this)] <= totalSupply;
+ 155 |     |     }
+ 156 |     |     
+ 157 |     |     function echidna_owner_not_zero() public view returns (bool) {
+ 158 |     |         return owner != address(0);
+ 159 |     |     }
+ 160 |     |     
+ 161 |     |     // Property specifically for pre-dilution functions
+ 162 |     |     function echidna_priority_functions_coverage() public view returns (bool) {
+ 163 |     |         // This property should be tested more frequently due to pre-dilution
+ 164 |     |         return userBalances[msg.sender] <= totalSupply;
+ 165 |     |     }
+ 166 |     |     
+ 167 |     |     // Property for differential treatment testing
+ 168 |     |     function echidna_complex_state_consistency() public view returns (bool) {
+ 169 |     |         // Complex property that should benefit from longer sequences
+ 170 |     |         return balance + userBalances[msg.sender] >= 0;
+ 171 |     |     }
+ 172 |     |     
+ 173 |     |     // Edge case property for adaptive fuzzing
+ 174 |     |     function echidna_edge_case_detection() public view returns (bool) {
+ 175 |     |         // Property that should trigger adaptive strategy adjustment
+ 176 |     |         if (paused && userBalances[msg.sender] > 0) {
+ 177 |     |             return balance > 0;
+ 178 |     |         }
+ 179 |     |         return true;
+ 180 |     |     }
+ 181 |     | }
+ 182 |     | 
+

@@ -1,0 +1,20 @@
+/home/dip-roy/echidna_dev/echidna_1/echidna/contact/ratelimiter.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | pragma solidity ^0.8.20;
+  3 |     | 
+  4 | *r  | contract RateLimiter {
+  5 | *   |     uint256 public last;
+  6 | *   |     uint256 public minDelay = 30 seconds;
+  7 |     | 
+  8 | *   |     function ping() external {
+  9 | *r  |         require(block.timestamp >= last + minDelay, "rate");
+ 10 | *   |         last = block.timestamp;
+ 11 |     |     }
+ 12 |     | 
+ 13 |     |     function echidna_minDelay_reasonable() external view returns (bool) {
+ 14 |     |         return minDelay >= 1;
+ 15 |     |     }
+ 16 |     | }
+ 17 |     | 
+ 18 |     | 
+

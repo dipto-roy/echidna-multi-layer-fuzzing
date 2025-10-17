@@ -1,0 +1,72 @@
+/home/dip-roy/echidna_dev/echidna_1/echidna/contact/permiterc.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | pragma solidity ^0.8.20;
+  3 |     | 
+  4 | *r  | contract PermitERC20 {
+  5 | *   |     string public constant name = "PermitToken";
+  6 | *   |     string public constant symbol = "PRMT";
+  7 | *   |     uint8 public constant decimals = 18;
+  8 | *   |     uint256 public totalSupply;
+  9 | *   |     mapping(address => uint256) public balanceOf;
+ 10 | *   |     mapping(address => mapping(address => uint256)) public allowance;
+ 11 |     | 
+ 12 |     |     // EIP-2612-ish (simplified, NOT production ready)
+ 13 | *   |     bytes32 public DOMAIN_SEPARATOR;
+ 14 | *   |     bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+ 15 | *   |     mapping(address => uint256) public nonces;
+ 16 |     | 
+ 17 | *   |     constructor() {
+ 18 | *   |         uint256 chainId;
+ 19 | *   |         assembly { chainId := chainid() }
+ 20 | *   |         DOMAIN_SEPARATOR = keccak256(abi.encode(
+ 21 | *   |             keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+ 22 | *   |             keccak256(bytes(name)),
+ 23 | *   |             keccak256(bytes("1")),
+ 24 | *   |             chainId,
+ 25 | *   |             address(this)
+ 26 |     |         ));
+ 27 | *   |         totalSupply = 1_000_000 ether;
+ 28 | *   |         balanceOf[msg.sender] = totalSupply;
+ 29 |     |     }
+ 30 |     | 
+ 31 | *   |     function transfer(address to, uint256 amount) external returns (bool) {
+ 32 | *r  |         require(balanceOf[msg.sender] >= amount, "bal");
+ 33 | *   |         unchecked { balanceOf[msg.sender] -= amount; }
+ 34 | *   |         balanceOf[to] += amount;
+ 35 | *   |         return true;
+ 36 |     |     }
+ 37 |     | 
+ 38 | *   |     function approve(address spender, uint256 amount) public returns (bool) {
+ 39 | *   |         allowance[msg.sender][spender] = amount;
+ 40 | *   |         return true;
+ 41 |     |     }
+ 42 |     | 
+ 43 | *   |     function transferFrom(address from, address to, uint256 amount) external returns (bool) {
+ 44 | *   |         uint256 allowed = allowance[from][msg.sender];
+ 45 | *r  |         require(allowed >= amount, "allow");
+ 46 | *   |         if (allowed != type(uint256).max) allowance[from][msg.sender] = allowed - amount;
+ 47 | *r  |         require(balanceOf[from] >= amount, "bal");
+ 48 | *   |         unchecked { balanceOf[from] -= amount; }
+ 49 | *   |         balanceOf[to] += amount;
+ 50 | *   |         return true;
+ 51 |     |     }
+ 52 |     | 
+ 53 | *   |     function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+ 54 | *r  |         require(block.timestamp <= deadline, "expired");
+ 55 | *   |         bytes32 digest = keccak256(abi.encodePacked(
+ 56 |     |             "\x19\x01",
+ 57 | *   |             DOMAIN_SEPARATOR,
+ 58 | *   |             keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+ 59 |     |         ));
+ 60 | *   |         address recovered = ecrecover(digest, v, r, s);
+ 61 | *r  |         require(recovered != address(0) && recovered == owner, "sig");
+ 62 |     |         allowance[owner][spender] = value;
+ 63 |     |     }
+ 64 |     | 
+ 65 |     |     // Echidna: totalSupply invariant
+ 66 |     |     function echidna_total_supply_constant() external view returns (bool) {
+ 67 |     |         return totalSupply == 1_000_000 ether;
+ 68 |     |     }
+ 69 |     | }
+ 70 |     | 
+

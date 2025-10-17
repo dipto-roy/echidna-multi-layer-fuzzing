@@ -1,0 +1,42 @@
+<style> code { white-space: pre-wrap; display: block; background-color: #eee; }.executed { background-color: #afa; }.reverted { background-color: #ffa; }.unexecuted { background-color: #faa; }.neutral { background-color: #eee; }</style><b>/home/dip-roy/echidna_dev/echidna_1/echidna/contact/uups-proxy.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>pragma solidity ^0.8.20;</span>
+  3 |     | <span class='neutral'></span>
+  4 |     | <span class='neutral'>// Minimal UUPS-like pattern (educational)</span>
+  5 |     | <span class='unexecuted'>contract UUPSProxy {</span>
+  6 |     | <span class='unexecuted'>    address public implementation;</span>
+  7 |     | <span class='unexecuted'>    address public admin;</span>
+  8 |     | <span class='neutral'></span>
+  9 |     | <span class='unexecuted'>    constructor(address impl) {</span>
+ 10 |     | <span class='unexecuted'>        implementation = impl;</span>
+ 11 |     | <span class='unexecuted'>        admin = msg.sender;</span>
+ 12 |     | <span class='neutral'>    }</span>
+ 13 |     | <span class='neutral'></span>
+ 14 |     | <span class='unexecuted'>    function upgradeTo(address impl) external {</span>
+ 15 |     | <span class='unexecuted'>        require(msg.sender == admin, &quot;only admin&quot;);</span>
+ 16 |     | <span class='unexecuted'>        implementation = impl;</span>
+ 17 |     | <span class='neutral'>    }</span>
+ 18 |     | <span class='neutral'></span>
+ 19 |     | <span class='neutral'>    fallback() external payable {</span>
+ 20 |     | <span class='unexecuted'>        address impl = implementation;</span>
+ 21 |     | <span class='neutral'>        assembly {</span>
+ 22 |     | <span class='unexecuted'>            calldatacopy(0, 0, calldatasize())</span>
+ 23 |     | <span class='unexecuted'>            let result := delegatecall(gas(), impl, 0, calldatasize(), 0, 0)</span>
+ 24 |     | <span class='unexecuted'>            returndatacopy(0, 0, returndatasize())</span>
+ 25 |     | <span class='unexecuted'>            switch result</span>
+ 26 |     | <span class='unexecuted'>            case 0 { revert(0, returndatasize()) }</span>
+ 27 |     | <span class='unexecuted'>            default { return(0, returndatasize()) }</span>
+ 28 |     | <span class='neutral'>        }</span>
+ 29 |     | <span class='neutral'>    }</span>
+ 30 |     | <span class='neutral'>}</span>
+ 31 |     | <span class='neutral'></span>
+ 32 | *r  | <span class='executed'>contract UUPSLogicV1 {</span>
+ 33 | *   | <span class='executed'>    uint256 public x;</span>
+ 34 | *   | <span class='executed'>    function inc() external { x += 1; }</span>
+ 35 |     | <span class='unexecuted'>    function echidna_x_monotonic() external view returns (bool) { return x &gt;= 0; }</span>
+ 36 |     | <span class='neutral'>}</span>
+
+</code>
+<br />
+

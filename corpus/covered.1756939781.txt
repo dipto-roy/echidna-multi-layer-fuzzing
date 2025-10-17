@@ -1,0 +1,26 @@
+/home/dip-roy/echidna_dev/echidna_1/echidna/contact/feeontransfertoken.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | pragma solidity ^0.8.20;
+  3 |     | 
+  4 | *r  | contract FeeOnTransferToken {
+  5 | *   |     mapping(address => uint256) public balanceOf;
+  6 | *   |     uint256 public totalSupply;
+  7 | *   |     uint256 public feeBps = 100; // 1%
+  8 |     | 
+  9 | *   |     constructor() { totalSupply = 100_000 ether; balanceOf[msg.sender] = totalSupply; }
+ 10 |     | 
+ 11 | *   |     function transfer(address to, uint256 amount) external returns (bool) {
+ 12 | *r  |         require(balanceOf[msg.sender] >= amount, "bal");
+ 13 | *   |         uint256 fee = (amount * feeBps) / 10_000;
+ 14 | *   |         uint256 out = amount - fee;
+ 15 | *   |         balanceOf[msg.sender] -= amount;
+ 16 | *   |         balanceOf[to] += out;
+ 17 | *   |         totalSupply -= fee; // burned
+ 18 | *   |         return true;
+ 19 |     |     }
+ 20 |     | 
+ 21 |     |     function echidna_fee_bps_bounds() external view returns (bool) {
+ 22 |     |         return feeBps <= 1_000; // <=10%
+ 23 |     |     }
+ 24 |     | }
+

@@ -25,58 +25,47 @@ import Echidna.Types.Test (TestConf(..))
 import Echidna.Types.Tx (TxConf(TxConf), maxGasPerBlock, defaultTimeDelay, defaultBlockDelay)
 
 instance FromJSON EConfig where
-  -- retrieve the config from the key usage annotated parse
   parseJSON x = (.econfig) <$> parseJSON @EConfigWithUsage x
 
 instance FromJSON EConfigWithUsage where
-  -- this runs the parser in a StateT monad which keeps track of the keys
-  -- utilized by the config parser
-  -- we can then compare the set difference between the keys found in the config
-  -- file and the keys used by the parser to compute which keys were set in the
-  -- config and not used and which keys were unset in the config and defaulted
   parseJSON o = do
-    let v' = case o of
-               Object v -> v
-               _        -> mempty
+    let v' = case o of Object v -> v; _ -> mempty
     (c, ks) <- runStateT (parser v') $ Set.fromList []
     let found = Set.fromList (keys v')
-    pure $ EConfigWithUsage c (found `Set.difference` ks) (ks `Set.difference` found)
-    -- this parser runs in StateT and comes equipped with the following
-    -- equivalent unary operators:
-    -- x .:? k (Parser) <==> x ..:? k (StateT)
-    -- x .!= v (Parser) <==> x ..!= v (StateT)
-    -- tl;dr use an extra initial . to lift into the StateT parser
+    pure $ EConfigWithUsage c
+               (found `Set.difference` ks)
+               (ks    `Set.difference` found)
     where
     parser v =
-      EConfig <$> campaignConfParser
-              <*> pure names
-              <*> solConfParser
-              <*> testConfParser
-              <*> txConfParser
-              <*> (UIConf <$> v ..:? "timeout" <*> formatParser)
-              <*> v ..:? "rpcUrl"
-              <*> v ..:? "rpcBlock"
-              <*> v ..:? "etherscanApiKey"
-              <*> v ..:? "projectName"
+      EConfig
+        <$> campaignConfParser
+        <*> pure names
+        <*> solConfParser
+        <*> testConfParser
+        <*> txConfParser
+        <*> (UIConf <$> v ..:? "timeout" <*> formatParser)
+        <*> v ..:? "rpcUrl"
+        <*> v ..:? "rpcBlock"
+        <*> v ..:? "etherscanApiKey"
+        <*> v ..:? "projectName"
       where
       useKey k = modify' $ Set.insert k
-      x ..:? k = useKey k >> lift (x .:? k)
-      x ..!= y = fromMaybe y <$> x
-      -- Parse as unbounded Integer and see if it fits into W256
+      x ..:? k  = useKey k >> lift (x .:? k)
+      x ..!= y  = fromMaybe y <$> x
+
       getWord256 k def = do
         value :: Integer <- fromMaybe (fromIntegral (def :: W256)) <$> v ..:? k
-        if value > fromIntegral (maxBound :: W256) then
-          fail $ show k <> ": value does not fit in 256 bits"
-        else
-          pure $ fromIntegral value
+        if value > fromIntegral (maxBound :: W256)
+         then fail $ show k <> ": value does not fit in 256 bits"
+         else pure $ fromIntegral value
 
       txConfParser = TxConf
-        <$> v ..:? "propMaxGas" ..!= maxGasPerBlock
-        <*> v ..:? "testMaxGas" ..!= maxGasPerBlock
+        <$> v ..:? "propMaxGas"    ..!= maxGasPerBlock
+        <*> v ..:? "testMaxGas"    ..!= maxGasPerBlock
         <*> getWord256 "maxGasprice" 0
         <*> getWord256 "maxTimeDelay" defaultTimeDelay
         <*> getWord256 "maxBlockDelay" defaultBlockDelay
-        <*> getWord256 "maxValue" 100000000000000000000 -- 100 eth
+        <*> getWord256 "maxValue" 100000000000000000000
 
       testConfParser = do
         psender <- v ..:? "psender" ..!= 0x10000
@@ -86,26 +75,46 @@ instance FromJSON EConfigWithUsage where
         pure $ TestConf classify (const psender)
 
       campaignConfParser = CampaignConf
-        <$> v ..:? "testLimit" ..!= defaultTestLimit
-        <*> v ..:? "stopOnFail" ..!= False
-        <*> v ..:? "estimateGas" ..!= False
-        <*> v ..:? "seqLen" ..!= defaultSequenceLength
-        <*> v ..:? "shrinkLimit" ..!= defaultShrinkLimit
-        <*> (v ..:? "coverage" <&> \case Just False -> Nothing;  _ -> Just mempty)
+        <$> v ..:? "testLimit"           ..!= defaultTestLimit
+        <*> v ..:? "stopOnFail"          ..!= False
+        <*> v ..:? "estimateGas"         ..!= False
+        <*> v ..:? "seqLen"              ..!= defaultSequenceLength
+        <*> v ..:? "shrinkLimit"         ..!= defaultShrinkLimit
+        <*> (v ..:? "coverage" <&> \case Just False -> Nothing; _ -> Just mempty)
         <*> v ..:? "seed"
-        <*> v ..:? "dictFreq" ..!= 0.40
-        <*> v ..:? "corpusDir" ..!= Nothing
-        <*> v ..:? "mutConsts" ..!= defaultMutationConsts
-        <*> v ..:? "coverageFormats" ..!= [Txt,Html,Lcov]
+        <*> v ..:? "dictFreq"            ..!= 0.40
+        <*> v ..:? "corpusDir"           ..!= Nothing
+        <*> v ..:? "mutConsts"           ..!= defaultMutationConsts
+        <*> v ..:? "coverageFormats"     ..!= [Txt,Html,Lcov]
         <*> v ..:? "workers"
         <*> v ..:? "server"
-        <*> v ..:? "symExec"            ..!= False
-        <*> v ..:? "symExecConcolic"    ..!= True
-        <*> v ..:? "symExecTargets"     ..!= Nothing
-        <*> v ..:? "symExecTimeout"     ..!= defaultSymExecTimeout
-        <*> v ..:? "symExecNSolvers"    ..!= defaultSymExecNWorkers
-        <*> v ..:? "symExecMaxIters"    ..!= defaultSymExecMaxIters
-        <*> v ..:? "symExecAskSMTIters" ..!= defaultSymExecAskSMTIters
+        <*> v ..:? "symExec"             ..!= False
+        <*> v ..:? "symExecConcolic"     ..!= True
+        <*> v ..:? "symExecTargets"      ..!= Nothing
+        <*> v ..:? "symExecTimeout"      ..!= defaultSymExecTimeout
+        <*> v ..:? "symExecNSolvers"     ..!= defaultSymExecNWorkers
+        <*> v ..:? "symExecMaxIters"     ..!= defaultSymExecMaxIters
+        <*> v ..:? "symExecAskSMTIters"  ..!= defaultSymExecAskSMTIters
+
+        -- Multi-Layer Fuzzing Optimization Framework
+        <*> v ..:? "preDilutionFunctions" ..!= []
+        <*> v ..:? "preDilutionWeight"    ..!= 0.35
+        <*> v ..:? "smartMutation"        ..!= True
+        <*> v ..:? "mutationDepth"        ..!= 3
+        <*> v ..:? "priorityMutationRate" ..!= 0.8
+        <*> v ..:? "normalMutationRate"   ..!= 0.3
+        <*> v ..:? "differentialTreatment" ..!= True
+        <*> v ..:? "prioritySequenceLength" ..!= 150
+        <*> v ..:? "normalSequenceLength"   ..!= 50
+        <*> v ..:? "priorityGasLimit"     ..!= 8000000
+        <*> v ..:? "normalGasLimit"       ..!= 3000000
+        <*> v ..:? "adaptiveFuzzing"      ..!= True
+        <*> v ..:? "crossoverRate"        ..!= 0.6
+        <*> v ..:? "elitismRate"          ..!= 0.1
+        <*> v ..:? "diversityThreshold"   ..!= 0.7
+        <*> v ..:? "optimizationTargets"  ..!= ["coverage", "bug_detection"]
+        <*> v ..:? "strategyLayers"       ..!= []
+        <*> v ..:? "maxArraySize"         ..!= 1000
 
       solConfParser = SolConf
         <$> v ..:? "contractAddr"    ..!= defaultContractAddr
@@ -123,19 +132,15 @@ instance FromJSON EConfigWithUsage where
         <*> v ..:? "initialize"      ..!= Nothing
         <*> v ..:? "deployContracts" ..!= []
         <*> v ..:? "deployBytecodes" ..!= []
-        <*> ((<|>) <$> v ..:? "allContracts"
-                   -- TODO: keep compatible with the old name for a while
-                   <*> lift (v .:? "multi-abi")) ..!= False
+        <*> ((<|>) <$> v ..:? "allContracts" <*> lift (v .:? "multi-abi")) ..!= False
         <*> mode
         <*> v ..:? "testDestruction" ..!= False
         <*> v ..:? "allowFFI"        ..!= False
         <*> fnFilter
         where
-        mode = v ..:? "testMode" >>= \case
-          Just s  -> pure $ validateTestMode s
-          Nothing -> pure "property"
-        fnFilter = bool Whitelist Blacklist <$> v ..:? "filterBlacklist" ..!= True
-                                            <*> v ..:? "filterFunctions" ..!= []
+          mode = v ..:? "testMode" >>= \case { Just s  -> pure $ validateTestMode s; Nothing -> pure "property" }
+          fnFilter = bool Whitelist Blacklist <$> v ..:? "filterBlacklist" ..!= True
+                                             <*> v ..:? "filterFunctions"  ..!= []
 
       names :: Names
       names Sender = (" from: " ++) . show
@@ -146,12 +151,15 @@ instance FromJSON EConfigWithUsage where
         Just "json"             -> pure . Just . NonInteractive $ JSON
         Just "none"             -> pure . Just . NonInteractive $ None
         Nothing -> pure Nothing
-        _ -> fail "Unrecognized format type (should be text, json, or none)")
+        _ -> fail "Unrecognized format type (should be text, json, or none)"
+        )
 
--- | The default config used by Echidna (see the 'FromJSON' instance for values used).
+-- | The default config used by Echidna
 defaultConfig :: EConfig
-defaultConfig = either (error "Config parser got messed up :(") id $ Y.decodeEither' ""
+defaultConfig = either (error "Config parser got messed up :(")
+                        id
+                        $ Y.decodeEither' ""
 
--- | Try to parse an Echidna config file, throw an error if we can't.
+-- | Parse an Echidna config file
 parseConfig :: FilePath -> IO EConfigWithUsage
 parseConfig f = BS.readFile f >>= Y.decodeThrow

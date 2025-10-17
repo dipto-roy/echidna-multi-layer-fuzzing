@@ -1,0 +1,19 @@
+testMode: "property"
+testLimit: 5000
+seqLen: 100
+format: "text"
+coverage: true
+corpusDir: "corpus"
+
+# Multi-Layer Fuzzing - matching buggy_contract.sol functions
+preDilutionFunctions:
+  - "increment"
+  - "decrement" 
+  - "reset"
+  - "dangerousFunction"
+preDilutionWeight: 0.35
+
+smartMutation: true
+mutationDepth: 3
+differentialTreatment: true
+adaptiveFuzzing: true

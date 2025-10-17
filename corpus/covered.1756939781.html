@@ -1,0 +1,30 @@
+<style> code { white-space: pre-wrap; display: block; background-color: #eee; }.executed { background-color: #afa; }.reverted { background-color: #ffa; }.unexecuted { background-color: #faa; }.neutral { background-color: #eee; }</style><b>/home/dip-roy/echidna_dev/echidna_1/echidna/contact/feeontransfertoken.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>pragma solidity ^0.8.20;</span>
+  3 |     | <span class='neutral'></span>
+  4 | *r  | <span class='executed'>contract FeeOnTransferToken {</span>
+  5 | *   | <span class='executed'>    mapping(address =&gt; uint256) public balanceOf;</span>
+  6 | *   | <span class='executed'>    uint256 public totalSupply;</span>
+  7 | *   | <span class='executed'>    uint256 public feeBps = 100; // 1%</span>
+  8 |     | <span class='neutral'></span>
+  9 | *   | <span class='executed'>    constructor() { totalSupply = 100_000 ether; balanceOf[msg.sender] = totalSupply; }</span>
+ 10 |     | <span class='neutral'></span>
+ 11 | *   | <span class='executed'>    function transfer(address to, uint256 amount) external returns (bool) {</span>
+ 12 | *r  | <span class='executed'>        require(balanceOf[msg.sender] &gt;= amount, &quot;bal&quot;);</span>
+ 13 | *   | <span class='executed'>        uint256 fee = (amount * feeBps) / 10_000;</span>
+ 14 | *   | <span class='executed'>        uint256 out = amount - fee;</span>
+ 15 | *   | <span class='executed'>        balanceOf[msg.sender] -= amount;</span>
+ 16 | *   | <span class='executed'>        balanceOf[to] += out;</span>
+ 17 | *   | <span class='executed'>        totalSupply -= fee; // burned</span>
+ 18 | *   | <span class='executed'>        return true;</span>
+ 19 |     | <span class='neutral'>    }</span>
+ 20 |     | <span class='neutral'></span>
+ 21 |     | <span class='unexecuted'>    function echidna_fee_bps_bounds() external view returns (bool) {</span>
+ 22 |     | <span class='unexecuted'>        return feeBps &lt;= 1_000; // &lt;=10%</span>
+ 23 |     | <span class='neutral'>    }</span>
+ 24 |     | <span class='neutral'>}</span>
+
+</code>
+<br />
+

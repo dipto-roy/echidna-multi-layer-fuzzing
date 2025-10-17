@@ -1,0 +1,30 @@
+/home/dip-roy/echidna_dev/echidna_1/echidna/contact/cpamm.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | pragma solidity ^0.8.20;
+  3 |     | 
+  4 | *r  | contract CPAMM {
+  5 | *   |     uint112 public reserve0;
+  6 | *   |     uint112 public reserve1;
+  7 |     | 
+  8 | *   |     function addLiquidity(uint112 a0, uint112 a1) external {
+  9 | *   |         reserve0 += a0;
+ 10 | *   |         reserve1 += a1;
+ 11 |     |     }
+ 12 |     | 
+ 13 | *   |     function swap0For1(uint112 dx) external {
+ 14 | *r  |         require(reserve0 + dx > 0 && reserve1 > 0, "empty");
+ 15 |     |         // Constant product x*y=k (approx naive, no fee)
+ 16 | *   |         uint256 newX = uint256(reserve0) + dx;
+ 17 | *   |         uint256 k = uint256(reserve0) * uint256(reserve1);
+ 18 | *   |         uint256 newY = k / newX;
+ 19 | *   |         uint112 dy = reserve1 - uint112(newY);
+ 20 | *   |         reserve0 = uint112(newX);
+ 21 | *   |         reserve1 = uint112(newY);
+ 22 |     |         // dy would be sent to user
+ 23 |     |     }
+ 24 |     | 
+ 25 |     |     function echidna_reserves_fit() external view returns (bool) {
+ 26 |     |         return reserve0 <= type(uint112).max && reserve1 <= type(uint112).max;
+ 27 |     |     }
+ 28 |     | }
+

@@ -1,0 +1,38 @@
+/home/dip-roy/echidna_dev/echidna_1/echidna/contact/uups-proxy.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | pragma solidity ^0.8.20;
+  3 |     | 
+  4 |     | // Minimal UUPS-like pattern (educational)
+  5 |     | contract UUPSProxy {
+  6 |     |     address public implementation;
+  7 |     |     address public admin;
+  8 |     | 
+  9 |     |     constructor(address impl) {
+ 10 |     |         implementation = impl;
+ 11 |     |         admin = msg.sender;
+ 12 |     |     }
+ 13 |     | 
+ 14 |     |     function upgradeTo(address impl) external {
+ 15 |     |         require(msg.sender == admin, "only admin");
+ 16 |     |         implementation = impl;
+ 17 |     |     }
+ 18 |     | 
+ 19 |     |     fallback() external payable {
+ 20 |     |         address impl = implementation;
+ 21 |     |         assembly {
+ 22 |     |             calldatacopy(0, 0, calldatasize())
+ 23 |     |             let result := delegatecall(gas(), impl, 0, calldatasize(), 0, 0)
+ 24 |     |             returndatacopy(0, 0, returndatasize())
+ 25 |     |             switch result
+ 26 |     |             case 0 { revert(0, returndatasize()) }
+ 27 |     |             default { return(0, returndatasize()) }
+ 28 |     |         }
+ 29 |     |     }
+ 30 |     | }
+ 31 |     | 
+ 32 | *r  | contract UUPSLogicV1 {
+ 33 | *   |     uint256 public x;
+ 34 | *   |     function inc() external { x += 1; }
+ 35 |     |     function echidna_x_monotonic() external view returns (bool) { return x >= 0; }
+ 36 |     | }
+

@@ -1,0 +1,27 @@
+/home/dip-roy/echidna_dev/echidna_1/echidna/contact/ownable2step.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | pragma solidity ^0.8.20;
+  3 |     | 
+  4 | *r  | contract Ownable2StepDemo {
+  5 | *   |     address public owner;
+  6 |     |     address public pendingOwner;
+  7 |     | 
+  8 | *   |     constructor() { owner = msg.sender; }
+  9 |     | 
+ 10 | *   |     function transferOwnership(address newOwner) external {
+ 11 | *r  |         require(msg.sender == owner, "owner");
+ 12 |     |         pendingOwner = newOwner;
+ 13 |     |     }
+ 14 |     | 
+ 15 |     |     function acceptOwnership() external {
+ 16 |     |         require(msg.sender == pendingOwner, "pending");
+ 17 |     |         owner = pendingOwner;
+ 18 |     |         pendingOwner = address(0);
+ 19 |     |     }
+ 20 |     | 
+ 21 |     |     function echidna_owner_not_zero_after_accept() external view returns (bool) {
+ 22 |     |         return owner != address(0);
+ 23 |     |     }
+ 24 |     | }
+ 25 |     | 
+

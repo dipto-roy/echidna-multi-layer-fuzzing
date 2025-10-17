@@ -1,0 +1,19 @@
+/home/dip-roy/echidna_dev/echidna_1/echidna/contact/v1-v2.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | pragma solidity ^0.8.20;
+  3 |     | 
+  4 |     | contract V1 {
+  5 | *   |     uint256 public a;
+  6 | *   |     uint256 public b;
+  7 |     | }
+  8 |     | 
+  9 | *r  | contract V2 is V1 {
+ 10 | *   |     uint256 public c;
+ 11 | *   |     function set(uint256 _a, uint256 _b, uint256 _c) external {
+ 12 | *   |         a=_a;b=_b;c=_c;
+ 13 |     |     }
+ 14 |     |     function echidna_storage_order() external view returns (bool) {
+ 15 |     |         return a >= 0 && b >= 0 && c >= 0;
+ 16 |     |     }
+ 17 |     | }
+

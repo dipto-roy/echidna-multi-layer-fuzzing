@@ -1,0 +1,35 @@
+<style> code { white-space: pre-wrap; display: block; background-color: #eee; }.executed { background-color: #afa; }.reverted { background-color: #ffa; }.unexecuted { background-color: #faa; }.neutral { background-color: #eee; }</style><b>/home/dip-roy/echidna_dev/echidna_1/echidna/contact/lotterycommit.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>pragma solidity ^0.8.20;</span>
+  3 |     | <span class='neutral'></span>
+  4 | *r  | <span class='executed'>contract LotteryCommitReveal {</span>
+  5 | *   | <span class='executed'>    bytes32 public commit;</span>
+  6 | *   | <span class='executed'>    address public player;</span>
+  7 | *   | <span class='executed'>    uint256 public stake;</span>
+  8 | *   | <span class='executed'>    bool public revealed;</span>
+  9 |     | <span class='neutral'></span>
+ 10 | *   | <span class='executed'>    function commitHash(bytes32 _c) external payable {</span>
+ 11 | *r  | <span class='executed'>        require(commit == bytes32(0), &quot;set&quot;);</span>
+ 12 | *r  | <span class='executed'>        require(msg.value &gt; 0, &quot;stake&quot;);</span>
+ 13 | *   | <span class='executed'>        commit = _c;</span>
+ 14 | *   | <span class='executed'>        stake = msg.value;</span>
+ 15 | *   | <span class='executed'>        player = msg.sender;</span>
+ 16 |     | <span class='neutral'>    }</span>
+ 17 |     | <span class='neutral'></span>
+ 18 | *r  | <span class='executed'>    function reveal(bytes32 salt, uint256 guess) external {</span>
+ 19 | *r  | <span class='executed'>        require(msg.sender == player, &quot;player&quot;);</span>
+ 20 | *   | <span class='executed'>        require(!revealed, &quot;done&quot;);</span>
+ 21 | *r  | <span class='executed'>        require(keccak256(abi.encodePacked(salt, guess)) == commit, &quot;bad&quot;);</span>
+ 22 |     | <span class='unexecuted'>        revealed = true;</span>
+ 23 |     | <span class='neutral'>    }</span>
+ 24 |     | <span class='neutral'></span>
+ 25 |     | <span class='unexecuted'>    function echidna_stake_after_commit() external view returns (bool) {</span>
+ 26 |     | <span class='unexecuted'>        return (commit == bytes32(0)) || (stake &gt; 0);</span>
+ 27 |     | <span class='neutral'>    }</span>
+ 28 |     | <span class='neutral'>}</span>
+ 29 |     | <span class='neutral'></span>
+
+</code>
+<br />
+

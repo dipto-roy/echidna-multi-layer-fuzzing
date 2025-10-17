@@ -1,0 +1,76 @@
+<style> code { white-space: pre-wrap; display: block; background-color: #eee; }.executed { background-color: #afa; }.reverted { background-color: #ffa; }.unexecuted { background-color: #faa; }.neutral { background-color: #eee; }</style><b>/home/dip-roy/echidna_dev/echidna_1/echidna/contact/permiterc.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>pragma solidity ^0.8.20;</span>
+  3 |     | <span class='neutral'></span>
+  4 | *r  | <span class='executed'>contract PermitERC20 {</span>
+  5 |     | <span class='unexecuted'>    string public constant name = &quot;PermitToken&quot;;</span>
+  6 |     | <span class='unexecuted'>    string public constant symbol = &quot;PRMT&quot;;</span>
+  7 |     | <span class='unexecuted'>    uint8 public constant decimals = 18;</span>
+  8 | *   | <span class='executed'>    uint256 public totalSupply;</span>
+  9 | *   | <span class='executed'>    mapping(address =&gt; uint256) public balanceOf;</span>
+ 10 |     | <span class='unexecuted'>    mapping(address =&gt; mapping(address =&gt; uint256)) public allowance;</span>
+ 11 |     | <span class='neutral'></span>
+ 12 |     | <span class='neutral'>    // EIP-2612-ish (simplified, NOT production ready)</span>
+ 13 |     | <span class='unexecuted'>    bytes32 public DOMAIN_SEPARATOR;</span>
+ 14 | *   | <span class='executed'>    bytes32 public constant PERMIT_TYPEHASH = keccak256(&quot;Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)&quot;);</span>
+ 15 | *   | <span class='executed'>    mapping(address =&gt; uint256) public nonces;</span>
+ 16 |     | <span class='neutral'></span>
+ 17 | *   | <span class='executed'>    constructor() {</span>
+ 18 | *   | <span class='executed'>        uint256 chainId;</span>
+ 19 | *   | <span class='executed'>        assembly { chainId := chainid() }</span>
+ 20 | *   | <span class='executed'>        DOMAIN_SEPARATOR = keccak256(abi.encode(</span>
+ 21 | *   | <span class='executed'>            keccak256(&quot;EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)&quot;),</span>
+ 22 | *   | <span class='executed'>            keccak256(bytes(name)),</span>
+ 23 | *   | <span class='executed'>            keccak256(bytes(&quot;1&quot;)),</span>
+ 24 | *   | <span class='executed'>            chainId,</span>
+ 25 | *   | <span class='executed'>            address(this)</span>
+ 26 |     | <span class='neutral'>        ));</span>
+ 27 | *   | <span class='executed'>        totalSupply = 1_000_000 ether;</span>
+ 28 | *   | <span class='executed'>        balanceOf[msg.sender] = totalSupply;</span>
+ 29 |     | <span class='neutral'>    }</span>
+ 30 |     | <span class='neutral'></span>
+ 31 | *   | <span class='executed'>    function transfer(address to, uint256 amount) external returns (bool) {</span>
+ 32 | *r  | <span class='executed'>        require(balanceOf[msg.sender] &gt;= amount, &quot;bal&quot;);</span>
+ 33 | *   | <span class='executed'>        unchecked { balanceOf[msg.sender] -= amount; }</span>
+ 34 | *   | <span class='executed'>        balanceOf[to] += amount;</span>
+ 35 | *   | <span class='executed'>        return true;</span>
+ 36 |     | <span class='neutral'>    }</span>
+ 37 |     | <span class='neutral'></span>
+ 38 | *   | <span class='executed'>    function approve(address spender, uint256 amount) public returns (bool) {</span>
+ 39 | *   | <span class='executed'>        allowance[msg.sender][spender] = amount;</span>
+ 40 | *   | <span class='executed'>        return true;</span>
+ 41 |     | <span class='neutral'>    }</span>
+ 42 |     | <span class='neutral'></span>
+ 43 | *   | <span class='executed'>    function transferFrom(address from, address to, uint256 amount) external returns (bool) {</span>
+ 44 | *   | <span class='executed'>        uint256 allowed = allowance[from][msg.sender];</span>
+ 45 | *r  | <span class='executed'>        require(allowed &gt;= amount, &quot;allow&quot;);</span>
+ 46 | *   | <span class='executed'>        if (allowed != type(uint256).max) allowance[from][msg.sender] = allowed - amount;</span>
+ 47 | *r  | <span class='executed'>        require(balanceOf[from] &gt;= amount, &quot;bal&quot;);</span>
+ 48 | *   | <span class='executed'>        unchecked { balanceOf[from] -= amount; }</span>
+ 49 | *   | <span class='executed'>        balanceOf[to] += amount;</span>
+ 50 | *   | <span class='executed'>        return true;</span>
+ 51 |     | <span class='neutral'>    }</span>
+ 52 |     | <span class='neutral'></span>
+ 53 | *   | <span class='executed'>    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {</span>
+ 54 | *r  | <span class='executed'>        require(block.timestamp &lt;= deadline, &quot;expired&quot;);</span>
+ 55 | *   | <span class='executed'>        bytes32 digest = keccak256(abi.encodePacked(</span>
+ 56 |     | <span class='neutral'>            &quot;\x19\x01&quot;,</span>
+ 57 | *   | <span class='executed'>            DOMAIN_SEPARATOR,</span>
+ 58 | *   | <span class='executed'>            keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))</span>
+ 59 |     | <span class='neutral'>        ));</span>
+ 60 | *   | <span class='executed'>        address recovered = ecrecover(digest, v, r, s);</span>
+ 61 | *r  | <span class='executed'>        require(recovered != address(0) &amp;&amp; recovered == owner, &quot;sig&quot;);</span>
+ 62 |     | <span class='unexecuted'>        allowance[owner][spender] = value;</span>
+ 63 |     | <span class='neutral'>    }</span>
+ 64 |     | <span class='neutral'></span>
+ 65 |     | <span class='neutral'>    // Echidna: totalSupply invariant</span>
+ 66 |     | <span class='unexecuted'>    function echidna_total_supply_constant() external view returns (bool) {</span>
+ 67 |     | <span class='unexecuted'>        return totalSupply == 1_000_000 ether;</span>
+ 68 |     | <span class='neutral'>    }</span>
+ 69 |     | <span class='neutral'>}</span>
+ 70 |     | <span class='neutral'></span>
+
+</code>
+<br />
+

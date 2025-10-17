@@ -1,0 +1,31 @@
+/home/dip-roy/echidna_dev/echidna_1/echidna/contact/lotterycommit.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | pragma solidity ^0.8.20;
+  3 |     | 
+  4 | *r  | contract LotteryCommitReveal {
+  5 | *   |     bytes32 public commit;
+  6 | *   |     address public player;
+  7 | *   |     uint256 public stake;
+  8 | *   |     bool public revealed;
+  9 |     | 
+ 10 | *   |     function commitHash(bytes32 _c) external payable {
+ 11 | *r  |         require(commit == bytes32(0), "set");
+ 12 | *r  |         require(msg.value > 0, "stake");
+ 13 | *   |         commit = _c;
+ 14 | *   |         stake = msg.value;
+ 15 | *   |         player = msg.sender;
+ 16 |     |     }
+ 17 |     | 
+ 18 | *r  |     function reveal(bytes32 salt, uint256 guess) external {
+ 19 | *r  |         require(msg.sender == player, "player");
+ 20 | *   |         require(!revealed, "done");
+ 21 | *r  |         require(keccak256(abi.encodePacked(salt, guess)) == commit, "bad");
+ 22 |     |         revealed = true;
+ 23 |     |     }
+ 24 |     | 
+ 25 |     |     function echidna_stake_after_commit() external view returns (bool) {
+ 26 |     |         return (commit == bytes32(0)) || (stake > 0);
+ 27 |     |     }
+ 28 |     | }
+ 29 |     | 
+

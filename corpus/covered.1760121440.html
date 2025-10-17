@@ -1,0 +1,32 @@
+<style> code { white-space: pre-wrap; display: block; background-color: #eee; }.executed { background-color: #afa; }.reverted { background-color: #ffa; }.unexecuted { background-color: #faa; }.neutral { background-color: #eee; }</style><b>/home/dip-roy/echidna_dev/echidna_1/echidna/contact/ratelimitederc.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>pragma solidity ^0.8.20;</span>
+  3 |     | <span class='neutral'></span>
+  4 | *r  | <span class='executed'>contract RateLimitedERC20Mint {</span>
+  5 | *   | <span class='executed'>    string public constant name = &quot;RLToken&quot;;</span>
+  6 | *   | <span class='executed'>    string public constant symbol = &quot;RLT&quot;;</span>
+  7 | *   | <span class='executed'>    uint8 public constant decimals = 18;</span>
+  8 | *   | <span class='executed'>    uint256 public totalSupply;</span>
+  9 | *   | <span class='executed'>    mapping(address =&gt; uint256) public balanceOf;</span>
+ 10 |     | <span class='neutral'></span>
+ 11 | *   | <span class='executed'>    uint256 public lastMint;</span>
+ 12 | *   | <span class='executed'>    uint256 public interval = 1 days;</span>
+ 13 | *   | <span class='executed'>    uint256 public mintAmount = 100 ether;</span>
+ 14 |     | <span class='neutral'></span>
+ 15 | *   | <span class='executed'>    function mint() external {</span>
+ 16 | *r  | <span class='executed'>        require(block.timestamp &gt;= lastMint + interval, &quot;wait&quot;);</span>
+ 17 | *   | <span class='executed'>        lastMint = block.timestamp;</span>
+ 18 | *   | <span class='executed'>        totalSupply += mintAmount;</span>
+ 19 | *   | <span class='executed'>        balanceOf[msg.sender] += mintAmount;</span>
+ 20 |     | <span class='neutral'>    }</span>
+ 21 |     | <span class='neutral'></span>
+ 22 |     | <span class='unexecuted'>    function echidna_interval_positive() external view returns (bool) {</span>
+ 23 |     | <span class='unexecuted'>        return interval &gt; 0;</span>
+ 24 |     | <span class='neutral'>    }</span>
+ 25 |     | <span class='neutral'>}</span>
+ 26 |     | <span class='neutral'></span>
+
+</code>
+<br />
+

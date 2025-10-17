@@ -1,0 +1,188 @@
+<style> code { white-space: pre-wrap; display: block; background-color: #eee; }.executed { background-color: #afa; }.reverted { background-color: #ffa; }.unexecuted { background-color: #faa; }.neutral { background-color: #eee; }</style><b>/home/dip-roy/echidna_dev/echidna_1/echidna/multilayer_test_contract.sol</b>
+<code>
+   1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+   2 |     | <span class='neutral'>pragma solidity ^0.8.0;</span>
+   3 |     | <span class='neutral'></span>
+   4 | *r  | <span class='executed'>contract MultiLayerTestContract {</span>
+   5 |     | <span class='unexecuted'>    uint256 public balance;</span>
+   6 | *   | <span class='executed'>    mapping(address =&gt; uint256) public userBalances;</span>
+   7 |     | <span class='unexecuted'>    mapping(address =&gt; mapping(address =&gt; uint256)) public allowances;</span>
+   8 | *   | <span class='executed'>    address public owner;</span>
+   9 |     | <span class='unexecuted'>    uint256 public totalSupply;</span>
+  10 | *   | <span class='executed'>    bool public paused;</span>
+  11 |     | <span class='neutral'>    </span>
+  12 | *   | <span class='executed'>    constructor() {</span>
+  13 | *   | <span class='executed'>        owner = msg.sender;</span>
+  14 | *   | <span class='executed'>        totalSupply = 1000000 * 10**18;</span>
+  15 | *   | <span class='executed'>        balance = totalSupply;</span>
+  16 |     | <span class='neutral'>    }</span>
+  17 |     | <span class='neutral'>    </span>
+  18 |     | <span class='neutral'>    modifier onlyOwner() {</span>
+  19 | *r  | <span class='executed'>        require(msg.sender == owner, &quot;Not owner&quot;);</span>
+  20 |     | <span class='neutral'>        _;</span>
+  21 |     | <span class='neutral'>    }</span>
+  22 |     | <span class='neutral'>    </span>
+  23 |     | <span class='neutral'>    modifier notPaused() {</span>
+  24 | *   | <span class='executed'>        require(!paused, &quot;Contract paused&quot;);</span>
+  25 |     | <span class='neutral'>        _;</span>
+  26 |     | <span class='neutral'>    }</span>
+  27 |     | <span class='neutral'>    </span>
+  28 |     | <span class='neutral'>    // Priority functions for pre-dilution testing</span>
+  29 | *r  | <span class='executed'>    function transfer(address to, uint256 amount) public notPaused returns (bool) {</span>
+  30 | *r  | <span class='executed'>        require(userBalances[msg.sender] &gt;= amount, &quot;Insufficient balance&quot;);</span>
+  31 | *r  | <span class='executed'>        require(to != address(0), &quot;Invalid recipient&quot;);</span>
+  32 |     | <span class='neutral'>        </span>
+  33 | *   | <span class='executed'>        userBalances[msg.sender] -= amount;</span>
+  34 | *   | <span class='executed'>        userBalances[to] += amount;</span>
+  35 | *   | <span class='executed'>        return true;</span>
+  36 |     | <span class='neutral'>    }</span>
+  37 |     | <span class='neutral'>    </span>
+  38 | *   | <span class='executed'>    function approve(address spender, uint256 amount) public notPaused returns (bool) {</span>
+  39 | *   | <span class='executed'>        allowances[msg.sender][spender] = amount;</span>
+  40 | *   | <span class='executed'>        return true;</span>
+  41 |     | <span class='neutral'>    }</span>
+  42 |     | <span class='neutral'>    </span>
+  43 | *   | <span class='executed'>    function withdraw(uint256 amount) public notPaused {</span>
+  44 | *r  | <span class='executed'>        require(userBalances[msg.sender] &gt;= amount, &quot;Insufficient balance&quot;);</span>
+  45 | *   | <span class='executed'>        require(balance &gt;= amount, &quot;Contract insufficient balance&quot;);</span>
+  46 |     | <span class='neutral'>        </span>
+  47 | *   | <span class='executed'>        userBalances[msg.sender] -= amount;</span>
+  48 | *   | <span class='executed'>        balance -= amount;</span>
+  49 |     | <span class='neutral'>        // Potential reentrancy vulnerability for testing</span>
+  50 | *   | <span class='executed'>        payable(msg.sender).transfer(amount);</span>
+  51 |     | <span class='neutral'>    }</span>
+  52 |     | <span class='neutral'>    </span>
+  53 | *   | <span class='executed'>    function deposit() public payable notPaused {</span>
+  54 | *r  | <span class='executed'>        require(msg.value &gt; 0, &quot;Must deposit something&quot;);</span>
+  55 | *   | <span class='executed'>        balance += msg.value;</span>
+  56 | *   | <span class='executed'>        userBalances[msg.sender] += msg.value;</span>
+  57 |     | <span class='neutral'>    }</span>
+  58 |     | <span class='neutral'>    </span>
+  59 | *   | <span class='executed'>    function mint(address to, uint256 amount) public onlyOwner notPaused {</span>
+  60 |     | <span class='unexecuted'>        require(to != address(0), &quot;Invalid recipient&quot;);</span>
+  61 |     | <span class='unexecuted'>        require(amount &gt; 0, &quot;Must mint positive amount&quot;);</span>
+  62 |     | <span class='neutral'>        </span>
+  63 |     | <span class='unexecuted'>        totalSupply += amount;</span>
+  64 |     | <span class='unexecuted'>        userBalances[to] += amount;</span>
+  65 |     | <span class='neutral'>        // Bug: No check for overflow in totalSupply</span>
+  66 |     | <span class='neutral'>    }</span>
+  67 |     | <span class='neutral'>    </span>
+  68 | *   | <span class='executed'>    function burn(uint256 amount) public notPaused {</span>
+  69 | *r  | <span class='executed'>        require(userBalances[msg.sender] &gt;= amount, &quot;Insufficient balance&quot;);</span>
+  70 |     | <span class='neutral'>        </span>
+  71 | *   | <span class='executed'>        userBalances[msg.sender] -= amount;</span>
+  72 | *   | <span class='executed'>        totalSupply -= amount;</span>
+  73 |     | <span class='neutral'>        // Bug: No check for underflow in totalSupply</span>
+  74 |     | <span class='neutral'>    }</span>
+  75 |     | <span class='neutral'>    </span>
+  76 | *   | <span class='executed'>    function swap(uint256 amountIn, uint256 minAmountOut) public notPaused returns (uint256) {</span>
+  77 | *r  | <span class='executed'>        require(amountIn &gt; 0, &quot;Invalid input amount&quot;);</span>
+  78 | *r  | <span class='executed'>        require(userBalances[msg.sender] &gt;= amountIn, &quot;Insufficient balance&quot;);</span>
+  79 |     | <span class='neutral'>        </span>
+  80 |     | <span class='neutral'>        // Simplified swap calculation with potential manipulation</span>
+  81 | *   | <span class='executed'>        uint256 amountOut = (amountIn * 95) / 100; // 5% fee</span>
+  82 | *r  | <span class='executed'>        require(amountOut &gt;= minAmountOut, &quot;Slippage too high&quot;);</span>
+  83 |     | <span class='neutral'>        </span>
+  84 | *   | <span class='executed'>        userBalances[msg.sender] -= amountIn;</span>
+  85 | *   | <span class='executed'>        userBalances[msg.sender] += amountOut;</span>
+  86 |     | <span class='neutral'>        </span>
+  87 | *   | <span class='executed'>        return amountOut;</span>
+  88 |     | <span class='neutral'>    }</span>
+  89 |     | <span class='neutral'>    </span>
+  90 |     | <span class='neutral'>    // Normal functions for differential treatment testing</span>
+  91 | *   | <span class='executed'>    function getBalance(address user) public view returns (uint256) {</span>
+  92 | *   | <span class='executed'>        return userBalances[user];</span>
+  93 |     | <span class='neutral'>    }</span>
+  94 |     | <span class='neutral'>    </span>
+  95 |     | <span class='unexecuted'>    function getAllowance(address user, address spender) public view returns (uint256) {</span>
+  96 |     | <span class='unexecuted'>        return allowances[user][spender];</span>
+  97 |     | <span class='neutral'>    }</span>
+  98 |     | <span class='neutral'>    </span>
+  99 | *   | <span class='executed'>    function pause() public onlyOwner {</span>
+ 100 |     | <span class='unexecuted'>        paused = true;</span>
+ 101 |     | <span class='neutral'>    }</span>
+ 102 |     | <span class='neutral'>    </span>
+ 103 | *   | <span class='executed'>    function unpause() public onlyOwner {</span>
+ 104 |     | <span class='unexecuted'>        paused = false;</span>
+ 105 |     | <span class='neutral'>    }</span>
+ 106 |     | <span class='neutral'>    </span>
+ 107 | *   | <span class='executed'>    function transferOwnership(address newOwner) public onlyOwner {</span>
+ 108 |     | <span class='unexecuted'>        require(newOwner != address(0), &quot;Invalid new owner&quot;);</span>
+ 109 |     | <span class='unexecuted'>        owner = newOwner;</span>
+ 110 |     | <span class='neutral'>    }</span>
+ 111 |     | <span class='neutral'>    </span>
+ 112 |     | <span class='neutral'>    // Complex function for smart mutation testing</span>
+ 113 | *   | <span class='executed'>    function complexOperation(</span>
+ 114 |     | <span class='neutral'>        uint256[] memory amounts,</span>
+ 115 |     | <span class='neutral'>        address[] memory recipients,</span>
+ 116 |     | <span class='neutral'>        bool[] memory flags</span>
+ 117 |     | <span class='neutral'>    ) public notPaused {</span>
+ 118 | *r  | <span class='executed'>        require(amounts.length == recipients.length, &quot;Array length mismatch&quot;);</span>
+ 119 | *r  | <span class='executed'>        require(amounts.length == flags.length, &quot;Array length mismatch&quot;);</span>
+ 120 | *r  | <span class='executed'>        require(amounts.length &lt;= 10, &quot;Too many operations&quot;);</span>
+ 121 |     | <span class='neutral'>        </span>
+ 122 |     | <span class='unexecuted'>        for (uint256 i = 0; i &lt; amounts.length; i++) {</span>
+ 123 |     | <span class='unexecuted'>            if (flags[i]) {</span>
+ 124 |     | <span class='unexecuted'>                require(userBalances[msg.sender] &gt;= amounts[i], &quot;Insufficient balance&quot;);</span>
+ 125 |     | <span class='unexecuted'>                userBalances[msg.sender] -= amounts[i];</span>
+ 126 |     | <span class='unexecuted'>                userBalances[recipients[i]] += amounts[i];</span>
+ 127 |     | <span class='neutral'>            }</span>
+ 128 |     | <span class='neutral'>        }</span>
+ 129 |     | <span class='neutral'>    }</span>
+ 130 |     | <span class='neutral'>    </span>
+ 131 |     | <span class='neutral'>    // Echidna properties for multi-layer testing</span>
+ 132 |     | <span class='unexecuted'>    function echidna_balance_never_negative() public view returns (bool) {</span>
+ 133 |     | <span class='unexecuted'>        return balance &gt;= 0;</span>
+ 134 |     | <span class='neutral'>    }</span>
+ 135 |     | <span class='neutral'>    </span>
+ 136 |     | <span class='unexecuted'>    function echidna_total_supply_consistency() public view returns (bool) {</span>
+ 137 |     | <span class='unexecuted'>        return totalSupply &gt;= 0;</span>
+ 138 |     | <span class='neutral'>    }</span>
+ 139 |     | <span class='neutral'>    </span>
+ 140 |     | <span class='unexecuted'>    function echidna_user_balance_never_negative() public view returns (bool) {</span>
+ 141 |     | <span class='unexecuted'>        return userBalances[msg.sender] &gt;= 0;</span>
+ 142 |     | <span class='neutral'>    }</span>
+ 143 |     | <span class='neutral'>    </span>
+ 144 |     | <span class='unexecuted'>    function echidna_total_supply_reasonable() public view returns (bool) {</span>
+ 145 |     | <span class='unexecuted'>        return totalSupply &lt;= 10**30; // Reasonable upper bound</span>
+ 146 |     | <span class='neutral'>    }</span>
+ 147 |     | <span class='neutral'>    </span>
+ 148 |     | <span class='unexecuted'>    function echidna_contract_balance_consistency() public view returns (bool) {</span>
+ 149 |     | <span class='neutral'>        // Contract balance should not exceed total supply</span>
+ 150 |     | <span class='unexecuted'>        return balance &lt;= totalSupply;</span>
+ 151 |     | <span class='neutral'>    }</span>
+ 152 |     | <span class='neutral'>    </span>
+ 153 |     | <span class='unexecuted'>    function echidna_allowance_reasonable() public view returns (bool) {</span>
+ 154 |     | <span class='unexecuted'>        return allowances[msg.sender][address(this)] &lt;= totalSupply;</span>
+ 155 |     | <span class='neutral'>    }</span>
+ 156 |     | <span class='neutral'>    </span>
+ 157 |     | <span class='unexecuted'>    function echidna_owner_not_zero() public view returns (bool) {</span>
+ 158 |     | <span class='unexecuted'>        return owner != address(0);</span>
+ 159 |     | <span class='neutral'>    }</span>
+ 160 |     | <span class='neutral'>    </span>
+ 161 |     | <span class='neutral'>    // Property specifically for pre-dilution functions</span>
+ 162 |     | <span class='unexecuted'>    function echidna_priority_functions_coverage() public view returns (bool) {</span>
+ 163 |     | <span class='neutral'>        // This property should be tested more frequently due to pre-dilution</span>
+ 164 |     | <span class='unexecuted'>        return userBalances[msg.sender] &lt;= totalSupply;</span>
+ 165 |     | <span class='neutral'>    }</span>
+ 166 |     | <span class='neutral'>    </span>
+ 167 |     | <span class='neutral'>    // Property for differential treatment testing</span>
+ 168 |     | <span class='unexecuted'>    function echidna_complex_state_consistency() public view returns (bool) {</span>
+ 169 |     | <span class='neutral'>        // Complex property that should benefit from longer sequences</span>
+ 170 |     | <span class='unexecuted'>        return balance + userBalances[msg.sender] &gt;= 0;</span>
+ 171 |     | <span class='neutral'>    }</span>
+ 172 |     | <span class='neutral'>    </span>
+ 173 |     | <span class='neutral'>    // Edge case property for adaptive fuzzing</span>
+ 174 |     | <span class='unexecuted'>    function echidna_edge_case_detection() public view returns (bool) {</span>
+ 175 |     | <span class='neutral'>        // Property that should trigger adaptive strategy adjustment</span>
+ 176 |     | <span class='unexecuted'>        if (paused &amp;&amp; userBalances[msg.sender] &gt; 0) {</span>
+ 177 |     | <span class='unexecuted'>            return balance &gt; 0;</span>
+ 178 |     | <span class='neutral'>        }</span>
+ 179 |     | <span class='unexecuted'>        return true;</span>
+ 180 |     | <span class='neutral'>    }</span>
+ 181 |     | <span class='neutral'>}</span>
+ 182 |     | <span class='neutral'></span>
+
+</code>
+<br />
+

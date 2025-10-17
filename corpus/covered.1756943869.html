@@ -1,0 +1,31 @@
+<style> code { white-space: pre-wrap; display: block; background-color: #eee; }.executed { background-color: #afa; }.reverted { background-color: #ffa; }.unexecuted { background-color: #faa; }.neutral { background-color: #eee; }</style><b>/home/dip-roy/echidna_dev/echidna_1/echidna/contact/refundable.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>pragma solidity ^0.8.20;</span>
+  3 |     | <span class='neutral'></span>
+  4 | *r  | <span class='executed'>contract RefundableCrowdsale {</span>
+  5 | *   | <span class='executed'>    uint256 public goal = 10 ether;</span>
+  6 |     | <span class='unexecuted'>    uint256 public raised;</span>
+  7 | *   | <span class='executed'>    bool public refunded;</span>
+  8 |     | <span class='neutral'></span>
+  9 | *   | <span class='executed'>    function contribute() external payable {</span>
+ 10 | *   | <span class='executed'>        raised += msg.value;</span>
+ 11 |     | <span class='neutral'>    }</span>
+ 12 |     | <span class='neutral'></span>
+ 13 | *r  | <span class='executed'>    function refund() external {</span>
+ 14 | *r  | <span class='executed'>        require(raised &lt; goal, &quot;met&quot;);</span>
+ 15 | *   | <span class='executed'>        refunded = true;</span>
+ 16 |     | <span class='neutral'>        // skip actual refunds for demo</span>
+ 17 |     | <span class='neutral'>    }</span>
+ 18 |     | <span class='neutral'></span>
+ 19 |     | <span class='unexecuted'>    function echidna_goal_nonzero() external view returns (bool) {</span>
+ 20 |     | <span class='unexecuted'>        return goal &gt; 0;</span>
+ 21 |     | <span class='neutral'>    }</span>
+ 22 |     | <span class='neutral'>}</span>
+ 23 |     | <span class='neutral'></span>
+ 24 |     | <span class='neutral'></span>
+ 25 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
